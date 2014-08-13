@@ -1,0 +1,10 @@
+# project files
+*.user
+
+# qmake artefacts
+**/Makefile
+
+# compilation
+**/*.o
+**/obj
+**/*.so*
