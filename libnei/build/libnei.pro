@@ -24,5 +24,5 @@ test {
     TEMPLATE = app
     TARGET = libnei_test
     SOURCES += ../test/main.cpp
-    LIBS += -lgtest -pthread
+    LIBS += -lpthread -lgtest
 }
