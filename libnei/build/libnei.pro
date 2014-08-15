@@ -12,9 +12,12 @@ TARGET = nei
 VERSION = 0.1.0
 
 # code
-SOURCES = ../src/libnei.cpp
+SOURCES = \
+    ../src/nei.cpp
 
-HEADERS = ../include/nei.h
+HEADERS = \
+    ../include/nei.h \
+    ../include/debug.h
 
 # test profile
 test {
