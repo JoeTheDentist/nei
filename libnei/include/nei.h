@@ -98,7 +98,6 @@ LabelClass kNN<T, Distance, LabelClass>::classify(T sample, unsigned int k)
             unsigned int cur_dist = _dist(cur_sample, sample);
             if (cur_dist < min_dist)
             {
-                TRACE("MATCH");
                 min_dist = cur_dist;
                 to_remove = it;
                 closest = *it;
@@ -109,8 +108,8 @@ LabelClass kNN<T, Distance, LabelClass>::classify(T sample, unsigned int k)
         _store.erase(to_remove);
         TRACE("Closest " << closest.first << ":" << closest.second);
         closests.push_back(closest);
-        if (class_count.find(closest.second) != class_count.end())
-            class_count[closest.second] = 0;
+        if (class_count.find(closest.second) == class_count.end())
+            class_count[closest.second] = 1;
         else
             ++class_count[closest.second];
     }
@@ -127,7 +126,6 @@ LabelClass kNN<T, Distance, LabelClass>::classify(T sample, unsigned int k)
             max_occur = it->second;
             max_class = it->first;
         }
-
     }
     return max_class;
 }

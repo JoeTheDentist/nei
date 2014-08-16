@@ -11,7 +11,7 @@ class _1d_distance
 public:
     float operator()(float x, float y)
     {
-        return ::abs(x - y);
+        return std::abs(x - y);
     }
 };
 
@@ -55,10 +55,10 @@ TEST(kNN, Classification1dMultiple)
     test.add_training_point(1.8, RIGHT);
     test.add_training_point(-1.4, LEFT);
     test.add_training_point(1.2, RIGHT);
-    EXPECT_EQ(test.classify(-0.5, 1), LEFT);
-    EXPECT_EQ(test.classify(0.5, 1), RIGHT);
-    EXPECT_EQ(test.classify(-2, 1), LEFT);
-    EXPECT_EQ(test.classify(2, 1), RIGHT);
+    EXPECT_EQ(test.classify(-0.5, 3), LEFT);
+    EXPECT_EQ(test.classify(0.5, 3), RIGHT);
+    EXPECT_EQ(test.classify(-2, 3), LEFT);
+    EXPECT_EQ(test.classify(2, 3), RIGHT);
 }
 
 int main(int argc, char **argv)
