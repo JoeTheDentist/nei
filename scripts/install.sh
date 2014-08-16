@@ -1,8 +1,11 @@
 #!/bin/sh
 
-apt-get install libgtest-dev cmake qt5-qmake
+# get gtest
+apt-get install libgtest-dev cmake
 cd /usr/src/gtest
 cmake CMakeLists.txt
 make
 cp *.a /usr/lib
 
+# get qmake
+apt-get install qt4-qmake

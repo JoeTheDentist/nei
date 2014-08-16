@@ -10,8 +10,11 @@ compiler:
     - clang
 
 before_install: "sudo ./scripts/install.sh"
-install: "cd ./libnei/build && qmake \"CONFIG+=test\" && make"
-script: "cd ./libnei/build && ./libnei_test"
+install:
+    - "cd ./libnei/build"
+    - "qmake \"CONFIG+=test\""
+    - "make"
+script: "./libnei_test"
 
 # Branches
 branches:
