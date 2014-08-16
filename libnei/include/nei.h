@@ -85,10 +85,10 @@ LabelClass kNN<T, Distance, LabelClass>::classify(T sample, unsigned int k)
     TRACE("Call to classify " << sample);
     // naive computation
     std::vector<std::pair<T, LabelClass> > closests;
-    std::map<LabelClass,int> class_count;
+    std::map<LabelClass, unsigned int> class_count;
     for (unsigned int i=0; i<k; ++i)
     {
-        unsigned int min_dist = -1;
+        unsigned int min_dist = static_cast<unsigned int>(-1);
         typename std::vector<std::pair<T, LabelClass> >::iterator to_remove;
         std::pair<T, LabelClass> closest;
         for (typename std::vector<std::pair<T, LabelClass> >::iterator it = _store.begin(); it != _store.end(); ++it)
@@ -104,7 +104,7 @@ LabelClass kNN<T, Distance, LabelClass>::classify(T sample, unsigned int k)
                 closest = *it;
             }
         }
-        if (min_dist == -1)
+        if (min_dist == static_cast<unsigned int>(-1))
             break;
         _store.erase(to_remove);
         TRACE("Closest " << closest.first << ":" << closest.second);
@@ -120,7 +120,7 @@ LabelClass kNN<T, Distance, LabelClass>::classify(T sample, unsigned int k)
     }
     unsigned int max_occur = 0;
     LabelClass max_class;
-    for (typename std::map<LabelClass, int>::iterator it = class_count.begin(); it != class_count.end(); ++it)
+    for (typename std::map<LabelClass, unsigned int>::iterator it = class_count.begin(); it != class_count.end(); ++it)
     {
         if (it->second > max_occur)
         {

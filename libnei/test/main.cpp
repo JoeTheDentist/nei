@@ -29,8 +29,8 @@ TEST(Distance, functor)
 
 TEST(kNN, Constructors)
 {
-    nei::kNN<int, _1d_distance, class_t> test1();
-    nei::kNN<int, _1d_distance, class_t> test2(_1d_distance());
+    nei::kNN<int, _1d_distance, class_t> test1;
+    nei::kNN<int, _1d_distance, class_t> test2( (_1d_distance()) );
     std::vector<std::pair<int, class_t> > v(4, std::pair<int, class_t>(1, LEFT));
     nei::kNN<int, _1d_distance, class_t> test3(v.begin(), v.end());
 }
