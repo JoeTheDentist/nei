@@ -10,6 +10,18 @@
 namespace nei
 {
 
+class One
+{
+public:
+    float operator()(float) const { return 1; }
+};
+
+class WeightedDistance
+{
+public:
+    float operator()(float d) const { return 1 / d; }
+};
+
 /**
  * @brief k nearest neighborgs algorithm.
  *
@@ -44,15 +56,32 @@ public:
      * @param sample point to add
      * @param cls equivalence class of the training point
      */
-    void add_training_point(T sample, LabelClass cls);
+    void add_training_point(const T &sample, LabelClass cls);
 
     /**
      * @brief classify
      * @param sample sample to classify
      * @param k number of neighbors to consider
      * @return equivalence class guessed for the given sample
+     * @see classify (templated)
      */
-    LabelClass classify(T sample, unsigned int k);
+    LabelClass classify(const T& sample, unsigned int k)
+    {
+        return classify(sample, k, One());
+    }
+
+    /**
+     * @brief classify
+     * @param sample sample to classify
+     * @param k number of neighbors to consider
+     * @param wd functor to treat distance of the k-neighbors. Defaut is constant function 1.
+     * @return equivalence class guessed for the given sample
+     *
+     * The "WeigthDistance" object is a functor aimed to treat
+     * each of the k-neighbors according to its distance.
+     */
+    template<class WeightDistance>
+    LabelClass classify(const T& sample, unsigned int k, const WeightDistance &wd);
 
 private:
     // temp, naive approach
@@ -74,18 +103,19 @@ kNN<T, Distance, LabelClass>::kNN(PairIterator begin, PairIterator end, const Di
 }
 
 template<class T, class Distance, class LabelClass>
-void kNN<T, Distance, LabelClass>::add_training_point(T sample, LabelClass cls)
+void kNN<T, Distance, LabelClass>::add_training_point(const T &sample, LabelClass cls)
 {
     _store.push_back(std::make_pair(sample, cls));
 }
 
 template<class T, class Distance, class LabelClass>
-LabelClass kNN<T, Distance, LabelClass>::classify(T sample, unsigned int k)
+template<class WeightDistance>
+LabelClass kNN<T, Distance, LabelClass>::classify(const T &sample, unsigned int k, const WeightDistance &wd)
 {
     TRACE("Call to classify " << sample);
     // naive computation
     std::vector<std::pair<T, LabelClass> > closests;
-    std::map<LabelClass, unsigned int> class_count;
+    std::map<LabelClass, float> class_weights;
     for (unsigned int i=0; i<k; ++i)
     {
         unsigned int min_dist = static_cast<unsigned int>(-1);
@@ -108,22 +138,22 @@ LabelClass kNN<T, Distance, LabelClass>::classify(T sample, unsigned int k)
         _store.erase(to_remove);
         TRACE("Closest " << closest.first << ":" << closest.second);
         closests.push_back(closest);
-        if (class_count.find(closest.second) == class_count.end())
-            class_count[closest.second] = 1;
+        if (class_weights.find(closest.second) == class_weights.end())
+            class_weights[closest.second] = wd(closest.second);
         else
-            ++class_count[closest.second];
+            class_weights[closest.second] += wd(closest.second);
     }
     for (typename std::vector<std::pair<T, LabelClass> >::iterator it = closests.begin(); it != closests.end(); ++it)
     {
         _store.push_back(*it);
     }
-    unsigned int max_occur = 0;
+    float max_weight = 0;
     LabelClass max_class;
-    for (typename std::map<LabelClass, unsigned int>::iterator it = class_count.begin(); it != class_count.end(); ++it)
+    for (typename std::map<LabelClass, float>::iterator it = class_weights.begin(); it != class_weights.end(); ++it)
     {
-        if (it->second > max_occur)
+        if (it->second > max_weight)
         {
-            max_occur = it->second;
+            max_weight = it->second;
             max_class = it->first;
         }
     }

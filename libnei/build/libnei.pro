@@ -28,5 +28,6 @@ test {
     TEMPLATE = app
     TARGET = libnei_test
     SOURCES += ../test/main.cpp
+    HEADERS += ../test/distance_1d.cpp
     LIBS += -lpthread -lgtest
 }
