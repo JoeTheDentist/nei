@@ -90,17 +90,11 @@ private:
 };
 
 template<class T, class Distance, class LabelClass>
-kNN<T, Distance, LabelClass>::kNN(const Distance &d) : _store()
-{
-    _dist = d;
-}
+kNN<T, Distance, LabelClass>::kNN(const Distance &d) : _store(), _dist(d) {}
 
 template<class T, class Distance, class LabelClass>
 template<class PairIterator>
-kNN<T, Distance, LabelClass>::kNN(PairIterator begin, PairIterator end, const Distance &d) : _store(begin, end)
-{
-    _dist = d;
-}
+kNN<T, Distance, LabelClass>::kNN(PairIterator begin, PairIterator end, const Distance &d) : _store(begin, end), _dist(d) {}
 
 template<class T, class Distance, class LabelClass>
 void kNN<T, Distance, LabelClass>::add_training_point(const T &sample, LabelClass cls)
