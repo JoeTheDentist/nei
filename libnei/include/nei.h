@@ -37,6 +37,7 @@ public:
     /**
      * @brief kNN constructor
      * @param d distance functor to use for computations
+     * @complexity O(1)
      */
     kNN(const Distance &d = Distance());
 
@@ -45,6 +46,7 @@ public:
      * @param begin start iterator
      * @param end end iterator
      * @param d distance functor to use for computations
+     * @complexity O(distance(begin, end))
      *
      * The provided iterator should contain std::pair<T, LabelClass>
      */
@@ -55,6 +57,7 @@ public:
      * @brief add_training_point
      * @param sample point to add
      * @param cls equivalence class of the training point
+     * @complexity O(1) (amortized)
      */
     void add_training_point(const T &sample, LabelClass cls);
 
@@ -76,6 +79,7 @@ public:
      * @param k number of neighbors to consider
      * @param wd functor to treat distance of the k-neighbors. Defaut is constant function 1.
      * @return equivalence class guessed for the given sample
+     * @complexity big theta(k x number of trained points)
      *
      * The "WeigthDistance" object is a functor aimed to treat
      * each of the k-neighbors according to its distance.

@@ -1,8 +1,6 @@
 
 #include <gtest/gtest.h>
 
-#include "distance_1d.h"
-
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
