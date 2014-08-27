@@ -3,6 +3,8 @@
 #include <sstream>
 #include <gtest/gtest.h>
 
+#include "../include/nei.h"
+
 #include "common.h"
 #include "image_number.h"
 
@@ -45,6 +47,22 @@ PBM_Image::~PBM_Image()
     delete[] _inner_matrix;
 }
 
+float PBM_Image::distance(const PBM_Image &img) const
+{
+    float dist = 0;
+    for (unsigned int i=0; i<_h; ++i)
+    {
+        for (unsigned int j=0; j<_w; ++j)
+        {
+            if (img._inner_matrix[i][j] != _inner_matrix[i][j])
+            {
+                ++dist;
+            }
+        }
+    }
+    return dist;
+}
+
 std::ostream& operator<<(std::ostream& os, const PBM_Image& img)
 {
     for (unsigned int row = 0; row<img._h; ++row)
@@ -64,4 +82,33 @@ TEST(PBM_Image, ReadImage)
     std::stringstream ss;
     ss << img;
     EXPECT_EQ(ss.str().length(), 528);
+}
+
+TEST(PBM_Image, kNN_SelfClassification)
+{
+    nei::kNN<PBM_Image, PBM_Distance, image_t> classifier;
+    for (unsigned int i=0; i<10; ++i)
+    {
+        std::stringstream file_name;
+        file_name << TestGlobals::TestTrainingDirectory << "1_" << i << ".pbm";
+        classifier.add_training_point(std::shared_ptr<PBM_Image>(new PBM_Image(file_name.str())), ONE);
+    }
+    for (unsigned int i=0; i<10; ++i)
+    {
+        std::stringstream file_name;
+        file_name << TestGlobals::TestTrainingDirectory << "2_" << i << ".pbm";
+        classifier.add_training_point(std::shared_ptr<PBM_Image>(new PBM_Image(file_name.str())), TWO);
+    }
+    for (unsigned int i=0; i<10; ++i)
+    {
+        std::stringstream file_name;
+        file_name << TestGlobals::TestTrainingDirectory << "1_" << i << ".pbm";
+        EXPECT_EQ(classifier.classify(PBM_Image(file_name.str()), 3), ONE);
+    }
+    for (unsigned int i=0; i<10; ++i)
+    {
+        std::stringstream file_name;
+        file_name << TestGlobals::TestTrainingDirectory << "2_" << i << ".pbm";
+        EXPECT_EQ(classifier.classify(PBM_Image(file_name.str()), 3), TWO);
+    }
 }

@@ -4,15 +4,9 @@
 #include <string>
 #include <iostream>
 
-/**
- * @brief The PBM_ASCII_Reader class
- *
- * Reader for ASCII PBM images
- */
-class PBM_ASCII_Reader
+enum image_t
 {
-public:
-
+    ONE=1, TWO
 };
 
 /**
@@ -45,6 +39,15 @@ public:
     void center();
 
     /**
+     * @brief distance with given image
+     * @param img
+     * @return distance
+     *
+     * Works only with images with same dimention
+     */
+    float distance(const PBM_Image &img) const;
+
+    /**
      * @brief dump of the image in the stream operator
      * @param os
      * @param img
@@ -56,6 +59,12 @@ private:
     unsigned int **_inner_matrix;
     unsigned int _h;
     unsigned int _w;
+};
+
+class PBM_Distance
+{
+public:
+    float operator()(const PBM_Image &img1, const PBM_Image &img2) { return img1.distance(img2); }
 };
 
 #endif // IMAGE_NUMBER_H
