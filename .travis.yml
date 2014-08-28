@@ -15,8 +15,10 @@ install:
     - "qmake \"CONFIG+=test\""
     - "make"
 script:
-    - "./libnei_test"
-    - "valgrind ./libnei_test"
+    - "cd .."
+    - "./build/libnei_test"
+    - "valgrind ./build/libnei_test"
+    - "cppcheck -v --enable=all src test -I include --std=c++11 --suppress=missingIncludeSystem"
 
 # Branches
 branches:

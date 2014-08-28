@@ -10,5 +10,5 @@ cp *.a /usr/lib
 # get qmake
 apt-get install qt4-qmake
 
-# get valgrind
-apt-get install valgrind
+# get quality tooling
+apt-get install valgrind cppcheck
