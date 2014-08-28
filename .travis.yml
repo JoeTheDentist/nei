@@ -14,7 +14,9 @@ install:
     - "cd ./libnei/build"
     - "qmake \"CONFIG+=test\""
     - "make"
-script: "./libnei_test"
+script:
+    - "./libnei_test"
+    - "valgrind ./libnei_test"
 
 # Branches
 branches:
