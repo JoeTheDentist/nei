@@ -137,7 +137,8 @@ LabelClass kNN<T, Distance, LabelClass>::classify(const T &sample, unsigned int 
         _store.push_back(*it);
     }
     float max_weight = 0;
-    LabelClass max_class;
+    // arbitrary value to avoid warning...
+    LabelClass max_class = static_cast<LabelClass>(0);
     for (typename std::map<LabelClass, float>::iterator it = class_weights.begin(); it != class_weights.end(); ++it)
     {
         if (it->second > max_weight)
