@@ -4,6 +4,7 @@
 #include <vector>
 #include <utility>
 #include <map>
+#include <memory>
 
 #include "../include/debug.h"
 
@@ -59,19 +60,7 @@ public:
      * @param cls equivalence class of the training point
      * @complexity O(1) (amortized)
      */
-    void add_training_point(const T &sample, LabelClass cls);
-
-    /**
-     * @brief classify
-     * @param sample sample to classify
-     * @param k number of neighbors to consider
-     * @return equivalence class guessed for the given sample
-     * @see classify (templated)
-     */
-    LabelClass classify(const T& sample, unsigned int k)
-    {
-        return classify(sample, k, One());
-    }
+    void add_training_point(std::shared_ptr<T> sample, LabelClass cls);
 
     /**
      * @brief classify
@@ -84,12 +73,12 @@ public:
      * The "WeigthDistance" object is a functor aimed to treat
      * each of the k-neighbors according to its distance.
      */
-    template<class WeightDistance>
-    LabelClass classify(const T& sample, unsigned int k, const WeightDistance &wd);
+    template<class WeightDistance = One>
+    LabelClass classify(const T &sample, unsigned int k, const WeightDistance &wd = WeightDistance());
 
 private:
     // temp, naive approach
-    std::vector<std::pair<T, LabelClass> > _store;
+    std::vector<std::pair<std::shared_ptr<T>, LabelClass> > _store;
     Distance _dist;
 };
 
@@ -101,7 +90,7 @@ template<class PairIterator>
 kNN<T, Distance, LabelClass>::kNN(PairIterator begin, PairIterator end, const Distance &d) : _store(begin, end), _dist(d) {}
 
 template<class T, class Distance, class LabelClass>
-void kNN<T, Distance, LabelClass>::add_training_point(const T &sample, LabelClass cls)
+void kNN<T, Distance, LabelClass>::add_training_point(std::shared_ptr<T> sample, LabelClass cls)
 {
     _store.push_back(std::make_pair(sample, cls));
 }
@@ -112,22 +101,23 @@ LabelClass kNN<T, Distance, LabelClass>::classify(const T &sample, unsigned int 
 {
     TRACE("Call to classify " << sample);
     // naive computation
-    std::vector<std::pair<T, LabelClass> > closests;
+    std::vector<std::pair<std::shared_ptr<T>, LabelClass> > closests;
     std::map<LabelClass, float> class_weights;
     for (unsigned int i=0; i<k; ++i)
     {
         unsigned int min_dist = static_cast<unsigned int>(-1);
-        typename std::vector<std::pair<T, LabelClass> >::iterator to_remove;
-        std::pair<T, LabelClass> closest;
-        for (typename std::vector<std::pair<T, LabelClass> >::iterator it = _store.begin(); it != _store.end(); ++it)
+        typename std::vector<std::pair<std::shared_ptr<T>, LabelClass> >::iterator to_remove;
+        auto closest = *_store.begin();
+        for (auto it = _store.begin(); it != _store.end(); ++it)
         {
-            T cur_sample = it->first;
+            std::shared_ptr<T> cur_sample = it->first;
             TRACE("Treat " << it->first << ":" << it->second << " distance " << _dist(cur_sample, sample));
-            unsigned int cur_dist = _dist(cur_sample, sample);
+            float cur_dist = _dist(*cur_sample, sample);
             if (cur_dist < min_dist)
             {
                 min_dist = cur_dist;
                 to_remove = it;
+                // copy
                 closest = *it;
             }
         }
@@ -135,13 +125,14 @@ LabelClass kNN<T, Distance, LabelClass>::classify(const T &sample, unsigned int 
             break;
         _store.erase(to_remove);
         TRACE("Closest " << closest.first << ":" << closest.second);
+        // copy
         closests.push_back(closest);
         if (class_weights.find(closest.second) == class_weights.end())
             class_weights[closest.second] = wd(closest.second);
         else
             class_weights[closest.second] += wd(closest.second);
     }
-    for (typename std::vector<std::pair<T, LabelClass> >::iterator it = closests.begin(); it != closests.end(); ++it)
+    for (auto it = closests.begin(); it != closests.end(); ++it)
     {
         _store.push_back(*it);
     }

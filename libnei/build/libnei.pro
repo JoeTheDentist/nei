@@ -16,6 +16,7 @@ COMPILER=$$(CXX)
 isEmpty(COMPILER) { COMPILER=g++ }
 QMAKE_CXX=$${COMPILER}
 QMAKE_LINK=$${COMPILER}
+QMAKE_CXXFLAGS+=-std=gnu++0x
 
 # code
 SOURCES = \
@@ -36,5 +37,5 @@ test {
     HEADERS += ../test/common.h \
         ../test/distance_1d.h \
         ../test/image_number.h
-    LIBS += -lpthread -lgtest
+    LIBS += -lgtest
 }
