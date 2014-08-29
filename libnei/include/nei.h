@@ -67,8 +67,11 @@ public:
      * @param sample point to add
      * @param cls equivalence class of the training point
      * @complexity O(1) (amortized)
+     *
+     * Taking ownership of the training point. Client cannot use any longer the contained
+     * object.
      */
-    void add_training_point(std::shared_ptr<T> sample, LabelClass cls);
+    void add_training_point(std::unique_ptr<T> sample, LabelClass cls);
 
     /**
      * @brief classify
@@ -86,7 +89,7 @@ public:
 
 private:
     // temp, naive approach
-    std::vector<std::pair<std::shared_ptr<T>, LabelClass> > _store;
+    std::vector<std::pair<std::unique_ptr<T>, LabelClass> > _store;
     Distance _dist;
 };
 
@@ -98,21 +101,20 @@ template<class PairIterator>
 kNN<T, Distance, LabelClass>::kNN(PairIterator begin, PairIterator end, const Distance &d) : _store(begin, end), _dist(d) {}
 
 template<class T, class Distance, class LabelClass>
-void kNN<T, Distance, LabelClass>::add_training_point(std::shared_ptr<T> sample, LabelClass cls)
+void kNN<T, Distance, LabelClass>::add_training_point(std::unique_ptr<T> sample, LabelClass cls)
 {
-    _store.push_back(std::make_pair(sample, cls));
+    _store.push_back(std::make_pair(std::move(sample), cls));
 }
 
 template<class T, class Distance, class LabelClass>
 template<class WeightDistance>
 LabelClass kNN<T, Distance, LabelClass>::classify(const T &sample, unsigned int k, const WeightDistance &wd)
 {
+    // naive computation with vector
     TRACE("Call to classify " << sample);
     if (_store.empty())
         throw NoTrainingDataException();
 
-    // naive computation with vector
-    std::vector<std::pair<std::shared_ptr<T>, LabelClass> > closests;
     std::map<LabelClass, float> class_weights;
     for (unsigned int i=0; i<k; ++i)
     {
@@ -143,9 +145,9 @@ LabelClass kNN<T, Distance, LabelClass>::classify(const T &sample, unsigned int 
 
         // put back to don't treat it at next iteration
         // swap
-        auto temp = _store[closest_index];
-        _store[closest_index] = _store[_store.size() - i - 1];
-        _store[_store.size() - i - 1] = temp;
+        auto temp = std::move(_store[closest_index]);
+        _store[closest_index] = std::move(_store[_store.size() - i - 1]);
+        _store[_store.size() - i - 1] = std::move(temp);
     }
 
     float max_weight = class_weights.begin()->second;
