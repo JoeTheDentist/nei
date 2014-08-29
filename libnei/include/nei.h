@@ -132,9 +132,8 @@ LabelClass kNN<T, Distance, LabelClass>::classify(const T &sample, unsigned int 
     {
         _store.push_back(*it);
     }
-    float max_weight = 0;
-    // arbitrary value to avoid warning...
-    LabelClass max_class = static_cast<LabelClass>(0);
+    float max_weight = class_weights.begin()->second;
+    LabelClass max_class = class_weights.begin()->first;
     for (auto it = class_weights.begin(); it != class_weights.end(); ++it)
     {
         if (it->second > max_weight)
