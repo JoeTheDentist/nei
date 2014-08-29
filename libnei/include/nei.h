@@ -105,32 +105,28 @@ LabelClass kNN<T, Distance, LabelClass>::classify(const T &sample, unsigned int 
     std::map<LabelClass, float> class_weights;
     for (unsigned int i=0; i<k; ++i)
     {
-        unsigned int min_dist = static_cast<unsigned int>(-1);
-        typename std::vector<std::pair<std::shared_ptr<T>, LabelClass> >::iterator to_remove;
-        auto closest = *_store.begin();
+        // assuming that there is at least a tarining point available (e.g. k points total)
+        // TODO proper treatment were we don't have enough points
+        auto to_remove = _store.begin();
+        float min_dist = _dist(*to_remove->first, sample);
         for (auto it = _store.begin(); it != _store.end(); ++it)
         {
             std::shared_ptr<T> cur_sample = it->first;
-            TRACE("Treat " << it->first << ":" << it->second << " distance " << _dist(cur_sample, sample));
+            TRACE("Treat " << it->first << ":" << it->second << " distance " << _dist(*cur_sample, sample));
             float cur_dist = _dist(*cur_sample, sample);
             if (cur_dist < min_dist)
             {
                 min_dist = cur_dist;
                 to_remove = it;
-                // copy
-                closest = *it;
             }
         }
-        if (min_dist == static_cast<unsigned int>(-1))
-            break;
-        _store.erase(to_remove);
-        TRACE("Closest " << closest.first << ":" << closest.second);
-        // copy
-        closests.push_back(closest);
-        if (class_weights.find(closest.second) == class_weights.end())
-            class_weights[closest.second] = wd(closest.second);
+        TRACE("Closest " << to_remove->first << ":" << to_remove->second);
+        if (class_weights.find(to_remove->second) == class_weights.end())
+            class_weights[to_remove->second] = wd(to_remove->second);
         else
-            class_weights[closest.second] += wd(closest.second);
+            class_weights[to_remove->second] += wd(to_remove->second);
+        closests.push_back(*to_remove);
+        _store.erase(to_remove);
     }
     for (auto it = closests.begin(); it != closests.end(); ++it)
     {
@@ -139,7 +135,7 @@ LabelClass kNN<T, Distance, LabelClass>::classify(const T &sample, unsigned int 
     float max_weight = 0;
     // arbitrary value to avoid warning...
     LabelClass max_class = static_cast<LabelClass>(0);
-    for (typename std::map<LabelClass, float>::iterator it = class_weights.begin(); it != class_weights.end(); ++it)
+    for (auto it = class_weights.begin(); it != class_weights.end(); ++it)
     {
         if (it->second > max_weight)
         {
