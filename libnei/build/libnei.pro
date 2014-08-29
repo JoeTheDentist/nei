@@ -33,9 +33,11 @@ test {
     QMAKE_CXXFLAGS += -DBUILD_DIR=\'\"$$PWD\"\'
     SOURCES += ../test/main.cpp \
         ../test/distance_1d.cpp \
-        ../test/image_number.cpp
+        ../test/image_number.cpp \
+        ../test/guarantees.cpp
     HEADERS += ../test/common.h \
         ../test/distance_1d.h \
-        ../test/image_number.h
+        ../test/image_number.h \
+        ../test/guarantees.h
     LIBS += -lgtest
 }
