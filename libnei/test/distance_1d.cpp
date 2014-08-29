@@ -18,8 +18,9 @@ TEST(kNN, Constructors)
 {
     nei::kNN<int, distance_1d, class_t> test1;
     nei::kNN<int, distance_1d, class_t> test2( (distance_1d()) );
-    /*std::vector<std::pair<int, class_t> > v(4, std::pair<int, class_t>(1, LEFT));
-    nei::kNN<int, _1d_distance, class_t> test3(v.begin(), v.end());*/
+    std::vector<std::pair<std::shared_ptr<int>, class_t> > v;
+    v.push_back(std::make_pair(std::shared_ptr<int>(new int(1)), RIGHT));
+    nei::kNN<int, distance_1d, class_t> test3(v.begin(), v.end());
 }
 
 TEST(kNN, Classification1dSimple)
@@ -31,6 +32,16 @@ TEST(kNN, Classification1dSimple)
     EXPECT_EQ(test.classify(0.5, 1), RIGHT);
     EXPECT_EQ(test.classify(-2, 1), LEFT);
     EXPECT_EQ(test.classify(2, 1), RIGHT);
+}
+
+TEST(kNN, Classification1dMistake)
+{
+    nei::kNN<float, distance_1d, class_t> test;
+    test.add_training_point(std::shared_ptr<float>(new float(-0.1)), LEFT);
+    test.add_training_point(std::shared_ptr<float>(new float(0.2)), RIGHT);
+    test.add_training_point(std::shared_ptr<float>(new float(0.3)), RIGHT);
+    EXPECT_EQ(test.classify(-0.1, 1), LEFT);
+    EXPECT_EQ(test.classify(-0.1, 3), RIGHT);
 }
 
 TEST(kNN, Classification1dException)

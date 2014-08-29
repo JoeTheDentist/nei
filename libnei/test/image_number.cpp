@@ -87,17 +87,14 @@ TEST(PBM_Image, ReadImage)
 TEST(PBM_Image, kNN_SelfClassification)
 {
     nei::kNN<PBM_Image, PBM_Distance, image_t> classifier;
-    for (unsigned int i=0; i<10; ++i)
+    for (unsigned int number = 1; number <= 2; ++number)
     {
-        std::stringstream file_name;
-        file_name << TestGlobals::TestTrainingDirectory << "1_" << i << ".pbm";
-        classifier.add_training_point(std::shared_ptr<PBM_Image>(new PBM_Image(file_name.str())), ONE);
-    }
-    for (unsigned int i=0; i<10; ++i)
-    {
-        std::stringstream file_name;
-        file_name << TestGlobals::TestTrainingDirectory << "2_" << i << ".pbm";
-        classifier.add_training_point(std::shared_ptr<PBM_Image>(new PBM_Image(file_name.str())), TWO);
+        for (unsigned int i=0; i<10; ++i)
+        {
+            std::stringstream file_name;
+            file_name << TestGlobals::TestTrainingDirectory << number << "_" << i << ".pbm";
+            classifier.add_training_point(std::shared_ptr<PBM_Image>(new PBM_Image(file_name.str())), static_cast<image_t>(number));
+        }
     }
     for (unsigned int i=0; i<10; ++i)
     {
