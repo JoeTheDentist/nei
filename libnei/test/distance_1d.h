@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-class _1d_distance
+class distance_1d
 {
 public:
     float operator()(float x, float y) const { return std::abs(x - y); }

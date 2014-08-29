@@ -5,6 +5,7 @@
 #include <utility>
 #include <map>
 #include <memory>
+#include <exception>
 
 #include "../include/debug.h"
 
@@ -22,6 +23,13 @@ class WeightedDistance
 public:
     float operator()(float d) const { return 1 / d; }
 };
+
+/**
+ * @brief The NoTrainingDataException class
+ * Exception to notify the user that he wants to classify
+ * object without training data.
+ */
+class NoTrainingDataException : public std::exception {};
 
 /**
  * @brief k nearest neighborgs algorithm.
@@ -100,38 +108,46 @@ template<class WeightDistance>
 LabelClass kNN<T, Distance, LabelClass>::classify(const T &sample, unsigned int k, const WeightDistance &wd)
 {
     TRACE("Call to classify " << sample);
-    // naive computation
+    if (_store.empty())
+        throw NoTrainingDataException();
+
+    // naive computation with vector
     std::vector<std::pair<std::shared_ptr<T>, LabelClass> > closests;
     std::map<LabelClass, float> class_weights;
     for (unsigned int i=0; i<k; ++i)
     {
-        // assuming that there is at least a tarining point available (e.g. k points total)
-        // TODO proper treatment were we don't have enough points
-        auto to_remove = _store.begin();
-        float min_dist = _dist(*to_remove->first, sample);
-        for (auto it = _store.begin(); it != _store.end(); ++it)
+        // skipping if we don't have enough training points
+        // we know that we have at least one anyway
+        if (i >= _store.size())
+            break;
+
+        // find current closest
+        unsigned int closest_index = 0;
+        float closest_distance = _dist(*_store[0].first, sample);
+        for (unsigned int j=0; j<_store.size() - i; ++j)
         {
-            std::shared_ptr<T> cur_sample = it->first;
-            TRACE("Treat " << it->first << ":" << it->second << " distance " << _dist(*cur_sample, sample));
-            float cur_dist = _dist(*cur_sample, sample);
-            if (cur_dist < min_dist)
+            float curr_dist = _dist(*_store[j].first, sample);
+            if (curr_dist < closest_distance)
             {
-                min_dist = cur_dist;
-                to_remove = it;
+                closest_distance = curr_dist;
+                closest_index = j;
             }
         }
-        TRACE("Closest " << to_remove->first << ":" << to_remove->second);
-        if (class_weights.find(to_remove->second) == class_weights.end())
-            class_weights[to_remove->second] = wd(to_remove->second);
+
+        // save closest
+        LabelClass closest_class = _store[closest_index].second;
+        if (class_weights.find(closest_class) == class_weights.end())
+            class_weights[closest_class] = wd(closest_distance);
         else
-            class_weights[to_remove->second] += wd(to_remove->second);
-        closests.push_back(*to_remove);
-        _store.erase(to_remove);
+            class_weights[closest_class] += wd(closest_distance);
+
+        // put back to don't treat it at next iteration
+        // swap
+        auto temp = _store[closest_index];
+        _store[closest_index] = _store[_store.size() - i - 1];
+        _store[_store.size() - i - 1] = temp;
     }
-    for (auto it = closests.begin(); it != closests.end(); ++it)
-    {
-        _store.push_back(*it);
-    }
+
     float max_weight = class_weights.begin()->second;
     LabelClass max_class = class_weights.begin()->first;
     for (auto it = class_weights.begin(); it != class_weights.end(); ++it)
