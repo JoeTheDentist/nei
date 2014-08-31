@@ -6,6 +6,8 @@
 #include <map>
 #include <memory>
 #include <exception>
+#include <iterator>
+#include <algorithm>
 
 #include "../include/debug.h"
 
@@ -38,8 +40,10 @@ class NoTrainingDataException : public std::exception {};
  * given a distance relationship.
  * The distance class should be a functor on T class.
  * The label class is an enum used for classification.
+ *
+ * This class is not copyable, nor movable.
  */
-template<class T, class Distance, class LabelClass>
+template<class T, class Distance, class LabelClass = int>
 class kNN
 {
 public:
@@ -57,10 +61,20 @@ public:
      * @param d distance functor to use for computations
      * @complexity O(distance(begin, end))
      *
-     * The provided iterator should contain std::pair<T, LabelClass>
+     * The provided iterator should contain std::pair<std::unique_ptr<T>, LabelClass>
+     * Note ownership of contained objects are moved to the kNN object.
+     * I.e. the container that manage the given iterators cannot be longer used.
+     * E.g. for a std::vector, it is strongly adivised to call clear after the
+     * construction of the kNN object.
      */
     template<class PairIterator>
     kNN(PairIterator begin, PairIterator end, const Distance &d = Distance());
+
+    /* TODO implement move operations */
+    kNN(const kNN&) = delete;
+    kNN(kNN&&) = delete;
+    kNN& operator=(const kNN&) = delete;
+    kNN& operator=(kNN&&) = delete;
 
     /**
      * @brief add_training_point
@@ -98,7 +112,10 @@ kNN<T, Distance, LabelClass>::kNN(const Distance &d) : _store(), _dist(d) {}
 
 template<class T, class Distance, class LabelClass>
 template<class PairIterator>
-kNN<T, Distance, LabelClass>::kNN(PairIterator begin, PairIterator end, const Distance &d) : _store(begin, end), _dist(d) {}
+kNN<T, Distance, LabelClass>::kNN(PairIterator begin, PairIterator end, const Distance &d) : _store(), _dist(d)
+{
+    for (PairIterator it = begin; it != end; ++it) { _store.push_back(std::move(*it)); }
+}
 
 template<class T, class Distance, class LabelClass>
 void kNN<T, Distance, LabelClass>::add_training_point(std::unique_ptr<T> sample, LabelClass cls)

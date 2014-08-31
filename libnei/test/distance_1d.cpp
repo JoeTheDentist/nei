@@ -18,9 +18,10 @@ TEST(kNN, Constructors)
 {
     nei::kNN<int, distance_1d, class_t> test1;
     nei::kNN<int, distance_1d, class_t> test2( (distance_1d()) );
-    /*std::vector<std::pair<std::unique_ptr<int>, class_t> > v;
+    std::vector<std::pair<std::unique_ptr<int>, class_t> > v;
     v.push_back(std::make_pair(std::unique_ptr<int>(new int(1)), RIGHT));
-    nei::kNN<int, distance_1d, class_t> test3(v.begin(), v.end());*/
+    nei::kNN<int, distance_1d, class_t> test3(v.begin(), v.end());
+    v.clear();
 }
 
 TEST(kNN, Classification1dSimple)

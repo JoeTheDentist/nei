@@ -13,3 +13,5 @@ TEST(NeiGuarantees, NoCopy_NoMove_NoAssignment)
     classifier.classify(GuaranteeVictim(0), 2);
     EXPECT_FALSE(GuaranteeVictim::bad);
 }
+
+// TODO, when move operator implemented, guarantee that there is no copy at move.
