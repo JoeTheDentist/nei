@@ -86,7 +86,7 @@ TEST(PBM_Image, ReadImage)
 
 TEST(PBM_Image, kNN_SelfClassification)
 {
-    nei::kNN<PBM_Image, PBM_Distance, image_t> classifier;
+    nei::kNN<PBM_Image, image_t, PBM_Distance> classifier;
     for (unsigned int number = 1; number <= 2; ++number)
     {
         for (unsigned int i=0; i<10; ++i)
