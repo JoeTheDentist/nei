@@ -43,7 +43,7 @@ class NoTrainingDataException : public std::exception {};
  *
  * This class is not copyable, nor movable.
  */
-template<class T, class Distance, class LabelClass = int>
+template<class T, class LabelClass = int, class Distance = std::function<float(const T&, const T&)>>
 class kNN
 {
 public:
@@ -52,7 +52,7 @@ public:
      * @param d distance functor to use for computations
      * @complexity O(1)
      */
-    kNN(const Distance &d = Distance());
+    kNN(const std::function<float(const T&, const T&)> &d = Distance());
 
     /**
      * @brief kNN constructor, filling in the tarining data
@@ -68,7 +68,7 @@ public:
      * construction of the kNN object.
      */
     template<class PairIterator>
-    kNN(PairIterator begin, PairIterator end, const Distance &d = Distance());
+    kNN(PairIterator begin, PairIterator end, const std::function<float(const T&, const T&)> &d = Distance());
 
     /* TODO implement move operations */
     kNN(const kNN&) = delete;
@@ -99,33 +99,33 @@ public:
      * each of the k-neighbors according to its distance.
      */
     template<class WeightDistance = One>
-    LabelClass classify(const T &sample, unsigned int k, const WeightDistance &wd = WeightDistance());
+    LabelClass classify(const T &sample, unsigned int k, const std::function<float(float)> &wd = WeightDistance());
 
 private:
     // temp, naive approach
     std::vector<std::pair<std::unique_ptr<T>, LabelClass> > _store;
-    Distance _dist;
+    std::function<float(const T&, const T&)> _dist;
 };
 
-template<class T, class Distance, class LabelClass>
-kNN<T, Distance, LabelClass>::kNN(const Distance &d) : _store(), _dist(d) {}
+template<class T, class LabelClass, class Distance>
+kNN<T, LabelClass, Distance>::kNN(const std::function<float(const T&, const T&)> &d) : _store(), _dist(d) {}
 
-template<class T, class Distance, class LabelClass>
+template<class T, class LabelClass, class Distance>
 template<class PairIterator>
-kNN<T, Distance, LabelClass>::kNN(PairIterator begin, PairIterator end, const Distance &d) : _store(), _dist(d)
+kNN<T, LabelClass, Distance>::kNN(PairIterator begin, PairIterator end, const std::function<float(const T&, const T&)> &d) : _store(), _dist(d)
 {
     for (PairIterator it = begin; it != end; ++it) { _store.push_back(std::move(*it)); }
 }
 
-template<class T, class Distance, class LabelClass>
-void kNN<T, Distance, LabelClass>::add_training_point(std::unique_ptr<T> sample, LabelClass cls)
+template<class T, class LabelClass, class Distance>
+void kNN<T, LabelClass, Distance>::add_training_point(std::unique_ptr<T> sample, LabelClass cls)
 {
     _store.push_back(std::make_pair(std::move(sample), cls));
 }
 
-template<class T, class Distance, class LabelClass>
+template<class T, class LabelClass, class Distance>
 template<class WeightDistance>
-LabelClass kNN<T, Distance, LabelClass>::classify(const T &sample, unsigned int k, const WeightDistance &wd)
+LabelClass kNN<T, LabelClass, Distance>::classify(const T &sample, unsigned int k, const std::function<float(float)> &wd)
 {
     // naive computation with vector
     TRACE("Call to classify " << sample);

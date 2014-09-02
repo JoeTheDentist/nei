@@ -16,17 +16,22 @@ TEST(Distance, functor)
 
 TEST(kNN, Constructors)
 {
-    nei::kNN<int, distance_1d, class_t> test1;
-    nei::kNN<int, distance_1d, class_t> test2( (distance_1d()) );
+    nei::kNN<int, class_t, distance_1d> test1;
+    nei::kNN<int, class_t, distance_1d> test2( (distance_1d()) );
     std::vector<std::pair<std::unique_ptr<int>, class_t> > v;
     v.push_back(std::make_pair(std::unique_ptr<int>(new int(1)), RIGHT));
-    nei::kNN<int, distance_1d, class_t> test3(v.begin(), v.end());
+    nei::kNN<int, class_t, distance_1d> test3(v.begin(), v.end());
     v.clear();
+}
+
+TEST(kNN, Lambda)
+{
+    nei::kNN<int> test( [](int, int) -> float { return 1; } );
 }
 
 TEST(kNN, Classification1dSimple)
 {
-    nei::kNN<float, distance_1d, class_t> test;
+    nei::kNN<float, class_t, distance_1d> test;
     test.add_training_point(std::unique_ptr<float>(new float(-1)), LEFT);
     test.add_training_point(std::unique_ptr<float>(new float(1)), RIGHT);
     EXPECT_EQ(test.classify(-0.5, 1), LEFT);
@@ -37,7 +42,7 @@ TEST(kNN, Classification1dSimple)
 
 TEST(kNN, Classification1dMistake)
 {
-    nei::kNN<float, distance_1d, class_t> test;
+    nei::kNN<float, class_t, distance_1d> test;
     test.add_training_point(std::unique_ptr<float>(new float(-0.1)), LEFT);
     test.add_training_point(std::unique_ptr<float>(new float(0.2)), RIGHT);
     test.add_training_point(std::unique_ptr<float>(new float(0.3)), RIGHT);
@@ -47,20 +52,20 @@ TEST(kNN, Classification1dMistake)
 
 TEST(kNN, Classification1dException)
 {
-    nei::kNN<float, distance_1d, class_t> test;
+    nei::kNN<float, class_t, distance_1d> test;
     ASSERT_THROW(test.classify(-0.5, 1), nei::NoTrainingDataException);
 }
 
 TEST(kNN, Classification1dMaxK)
 {
-    nei::kNN<float, distance_1d, class_t> test;
+    nei::kNN<float, class_t, distance_1d> test;
     test.add_training_point(std::unique_ptr<float>(new float(-1)), LEFT);
     ASSERT_NO_THROW(test.classify(-0.5, 10));
 }
 
 TEST(kNN, Classification1dMultiple)
 {
-    nei::kNN<float, distance_1d, class_t> test;
+    nei::kNN<float, class_t, distance_1d> test;
     test.add_training_point(std::unique_ptr<float>(new float(-1)), LEFT);
     test.add_training_point(std::unique_ptr<float>(new float(1)), RIGHT);
     test.add_training_point(std::unique_ptr<float>(new float(-0.3)), LEFT);
