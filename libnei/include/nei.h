@@ -81,11 +81,23 @@ public:
      * @param sample point to add
      * @param cls equivalence class of the training point
      * @complexity O(1) (amortized)
+     * @guarantee no copy, no move
      *
      * Taking ownership of the training point. Client cannot use any longer the contained
      * object.
      */
     void add_training_point(std::unique_ptr<T> sample, LabelClass cls);
+
+    /**
+     * @brief add_training_point
+     * @param sample point to add
+     * @param cls equivalence class of the training point
+     * @complexity O(1) (amortized)
+     * @guarantee no copy
+     *
+     * Relies on move constructor.
+     */
+    void add_training_point(T &&sample, LabelClass cls);
 
     /**
      * @brief classify
@@ -98,8 +110,7 @@ public:
      * The "WeigthDistance" object is a functor aimed to treat
      * each of the k-neighbors according to its distance.
      */
-    template<class WeightDistance = One>
-    LabelClass classify(const T &sample, unsigned int k, const std::function<float(float)> &wd = WeightDistance());
+    LabelClass classify(const T &sample, unsigned int k, const std::function<float(float)> &wd = One());
 
 private:
     // temp, naive approach
@@ -124,7 +135,12 @@ void kNN<T, LabelClass, Distance>::add_training_point(std::unique_ptr<T> sample,
 }
 
 template<class T, class LabelClass, class Distance>
-template<class WeightDistance>
+void kNN<T, LabelClass, Distance>::add_training_point(T &&sample, LabelClass cls)
+{
+    _store.push_back(std::make_pair(std::unique_ptr<T>(new T(std::move(sample))), cls));
+}
+
+template<class T, class LabelClass, class Distance>
 LabelClass kNN<T, LabelClass, Distance>::classify(const T &sample, unsigned int k, const std::function<float(float)> &wd)
 {
     // naive computation with vector
