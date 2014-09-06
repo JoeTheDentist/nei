@@ -12,46 +12,19 @@ enum guarantee_t { NONE };
 class GuaranteeVictim
 {
 public:
-    /**
-     * @brief GuaranteeVictim default constructor
-     * Should not be called by API
-     */
-    GuaranteeVictim() { GuaranteeVictim::bad = true; }
-
-    /**
-     * @brief GuaranteeVictim parametrized constructor
-     * The only one we use for tests
-     */
     GuaranteeVictim(unsigned int) {}
 
-    /**
-     * @brief GuaranteeVictim copy constructor
-     * Should not be called by API
-     */
-    GuaranteeVictim(const GuaranteeVictim &) { GuaranteeVictim::bad = true; }
+    GuaranteeVictim(const GuaranteeVictim &) { ++GuaranteeVictim::copies; }
 
-    /**
-     * @brief GuaranteeVictim move constructor
-     * Should not be called by API
-     */
-    GuaranteeVictim(GuaranteeVictim &&) { GuaranteeVictim::bad = true; }
+    GuaranteeVictim(GuaranteeVictim &&) { ++GuaranteeVictim::moves; }
 
-    /**
-     * @brief operator = copy assignment
-     * @return
-     * Should not be called by API
-     */
-    GuaranteeVictim& operator=(const GuaranteeVictim &) { GuaranteeVictim::bad = true; return *this; }
+    GuaranteeVictim& operator=(const GuaranteeVictim &) { ++GuaranteeVictim::copies; return *this; }
 
-    /**
-     * @brief operator = move assignment
-     * @return
-     * Should not be called by API
-     */
-    GuaranteeVictim& operator=(GuaranteeVictim &&) { GuaranteeVictim::bad = true; return *this; }
+    GuaranteeVictim& operator=(GuaranteeVictim &&) { ++GuaranteeVictim::moves; return *this; }
 
-    // member to check validity of the object
-    static bool bad;
+    // members to check validity of the object
+    static unsigned int copies;
+    static unsigned int moves;
 };
 
 class GuaranteeDistance
@@ -60,6 +33,7 @@ public:
     float operator() (const GuaranteeVictim&, const GuaranteeVictim&) { return 0; }
 };
 
-bool GuaranteeVictim::bad = false;
+unsigned int GuaranteeVictim::copies = 0;
+unsigned int GuaranteeVictim::moves = 0;
 
 #endif // GUARANTEES_H
