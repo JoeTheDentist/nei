@@ -79,5 +79,6 @@ TEST(kNN, Classification1dMultiple)
     EXPECT_EQ(test.classify(-2, 3), LEFT);
     EXPECT_EQ(test.classify(2, 3), RIGHT);
     EXPECT_EQ(test.classify(2, 3, nei::WeightedDistance()), RIGHT);
-    //EXPECT_EQ(test.classify(2, 3, [](float d) -> float { return 1/d; }), RIGHT);
+    class_t lambda_test = test.classify(2, 3, [](float d) -> float { return 1/d; });
+    EXPECT_EQ(lambda_test, RIGHT);
 }
