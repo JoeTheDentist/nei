@@ -27,15 +27,15 @@ TEST(kNN, Constructors)
 TEST(kNN, Lambda)
 {
     nei::kNN<int> test( [](int i, int j) -> float { return std::abs(i-j); } );
-    test.add_training_point(1, RIGHT);
+    test.add_training_point(RIGHT, 1);
     test.classify(1,1);
 }
 
 TEST(kNN, Classification1dSimple)
 {
     nei::kNN<float, class_t, distance_1d> test;
-    test.add_training_point(std::unique_ptr<float>(new float(-1)), LEFT);
-    test.add_training_point(1, RIGHT);
+    test.add_training_point(LEFT, std::unique_ptr<float>(new float(-1)));
+    test.add_training_point(RIGHT, 1);
     EXPECT_EQ(test.classify(-0.5, 1), LEFT);
     EXPECT_EQ(test.classify(0.5, 1), RIGHT);
     EXPECT_EQ(test.classify(-2, 1), LEFT);
@@ -45,9 +45,9 @@ TEST(kNN, Classification1dSimple)
 TEST(kNN, Classification1dMistake)
 {
     nei::kNN<float, class_t, distance_1d> test;
-    test.add_training_point(-0.1, LEFT);
-    test.add_training_point(0.2, RIGHT);
-    test.add_training_point(0.3, RIGHT);
+    test.add_training_point(LEFT, -0.1);
+    test.add_training_point(RIGHT, 0.2);
+    test.add_training_point(RIGHT, 0.3);
     EXPECT_EQ(test.classify(-0.1, 1), LEFT);
     EXPECT_EQ(test.classify(-0.1, 3), RIGHT);
 }
@@ -61,19 +61,19 @@ TEST(kNN, Classification1dExceptionNoData)
 TEST(kNN, Classification1dMaxK)
 {
     nei::kNN<float, class_t, distance_1d> test;
-    test.add_training_point(-1, LEFT);
+    test.add_training_point(LEFT, -1);
     ASSERT_NO_THROW(test.classify(-0.5, 10));
 }
 
 TEST(kNN, Classification1dMultiple)
 {
     nei::kNN<float, class_t, distance_1d> test;
-    test.add_training_point(-1, LEFT);
-    test.add_training_point(1, RIGHT);
-    test.add_training_point(-0.3, LEFT);
-    test.add_training_point(1.8, RIGHT);
-    test.add_training_point(-1.4, LEFT);
-    test.add_training_point(1.2, RIGHT);
+    test.add_training_point(LEFT, -1);
+    test.add_training_point(RIGHT, 1);
+    test.add_training_point(LEFT, -0.3);
+    test.add_training_point(RIGHT, 1.8);
+    test.add_training_point(LEFT, -1.4);
+    test.add_training_point(RIGHT, 1.2);
     EXPECT_EQ(test.classify(-0.5, 3), LEFT);
     EXPECT_EQ(test.classify(0.5, 3), RIGHT);
     EXPECT_EQ(test.classify(-2, 3), LEFT);

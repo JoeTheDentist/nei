@@ -86,18 +86,17 @@ public:
      * Taking ownership of the training point. Client cannot use any longer the contained
      * object.
      */
-    void add_training_point(std::unique_ptr<T> sample, LabelClass cls);
+    void add_training_point(LabelClass cls, std::unique_ptr<T> sample);
 
     /**
      * @brief add_training_point
      * @param sample point to add
      * @param cls equivalence class of the training point
      * @complexity O(1) (amortized)
-     * @guarantee no copy
-     *
-     * Relies on move constructor.
+     * @guarantee no copy, no move
      */
-    void add_training_point(T &&sample, LabelClass cls);
+    template<typename ...ConstructArgs>
+    void add_training_point(LabelClass cls, ConstructArgs&&... args);
 
     /**
      * @brief classify
@@ -129,15 +128,16 @@ kNN<T, LabelClass, Distance>::kNN(PairIterator begin, PairIterator end, const st
 }
 
 template<class T, class LabelClass, class Distance>
-void kNN<T, LabelClass, Distance>::add_training_point(std::unique_ptr<T> sample, LabelClass cls)
+void kNN<T, LabelClass, Distance>::add_training_point(LabelClass cls, std::unique_ptr<T> sample)
 {
     _store.push_back(std::make_pair(std::move(sample), cls));
 }
 
 template<class T, class LabelClass, class Distance>
-void kNN<T, LabelClass, Distance>::add_training_point(T &&sample, LabelClass cls)
+template<typename ...ConstructArgs>
+void kNN<T, LabelClass, Distance>::add_training_point(LabelClass cls, ConstructArgs&&... args)
 {
-    _store.push_back(std::make_pair(std::unique_ptr<T>(new T(std::move(sample))), cls));
+    _store.push_back(std::make_pair(std::unique_ptr<T>(new T(std::forward<ConstructArgs>(args)...)), cls));
 }
 
 template<class T, class LabelClass, class Distance>

@@ -93,7 +93,7 @@ TEST(PBM_Image, kNN_SelfClassification)
         {
             std::stringstream file_name;
             file_name << TestGlobals::TestTrainingDirectory << number << "_" << i << ".pbm";
-            classifier.add_training_point(std::unique_ptr<PBM_Image>(new PBM_Image(file_name.str())), static_cast<image_t>(number));
+            classifier.add_training_point(static_cast<image_t>(number), file_name.str());
         }
     }
     for (unsigned int number = 1; number <= 2; ++number)
